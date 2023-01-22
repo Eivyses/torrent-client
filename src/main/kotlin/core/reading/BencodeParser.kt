@@ -3,57 +3,60 @@ package core.reading
 import java.io.InputStream
 import java.nio.file.Path
 import kotlin.io.path.inputStream
-import kotlin.io.path.readBytes
 
 // bencode is the encoding used for torrent files
 class BencodeParser {
 
   fun parseBencodeFile(path: Path) {
-    val bytes = path.readBytes()
-    bytes.forEach { print(it.toChar().toString()) }
-    println()
+    //    val bytes = path.readBytes()
+    //    bytes.forEach { print(it.toChar().toString()) }
+    //    println()
 
+    val map = mutableMapOf<String, Any>()
     path.inputStream().use { inputStream ->
-      var pos = 0
-      while (pos != -1) {
-        pos = readNextObject(inputStream)
+      while (true) {
+        val values = readNextObject(inputStream) ?: break
+        if (values is Map<*, *>) {
+          @Suppress("UNCHECKED_CAST") map.putAll(values as Map<out String, Any>)
+        }
       }
     }
   }
 
-  private fun readNextObject(inputStream: InputStream): Int {
+  private fun readNextObject(inputStream: InputStream): Any? {
     val currentByte = inputStream.read()
     if (currentByte == -1 || currentByte.toChar() == 'e') {
       println("End of object")
-      return -1
+      return null
     }
     when (currentByte.asBencodeType()) {
       BencodeType.NUMBER -> {
         val number = inputStream.readLong('e')!!
-        println("Number found: $number")
+        //        println("Number found: $number")
+        return number
       }
       BencodeType.BYTE_STRING -> {
         val lengthString = inputStream.readLong(':')
         val length = (currentByte.toChar().toString() + lengthString).toInt()
         val string = String(inputStream.readNBytes(length))
-        println("New String found: $string")
+        //        println("New String found: $string")
+        return string
       }
       BencodeType.LIST -> {
-        //        pos = readNextObject(pos, bytes)
-        // drop suffix
-        inputStream.read()
-        println("New list entry found")
+        TODO("Implement")
       }
       BencodeType.DICTIONARY -> {
+        val map = mutableMapOf<String, Any>()
         while (true) {
           val keyLength = inputStream.readLong(':')?.toInt() ?: break
           val key = String(inputStream.readNBytes(keyLength))
-          println("Dictionary key: $key")
-          readNextObject(inputStream)
+          //          println("Dictionary key: $key")
+          val value = readNextObject(inputStream)!!
+          map[key] = value
         }
+        return map
       }
     }
-    return currentByte
   }
 
   private fun InputStream.readLong(endSuffix: Char): Long? {
