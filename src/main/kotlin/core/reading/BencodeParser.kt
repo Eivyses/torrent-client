@@ -1,8 +1,11 @@
 package core.reading
 
+import java.io.InputStream
 import java.nio.file.Path
+import kotlin.io.path.inputStream
 import kotlin.io.path.readBytes
 
+// bencode is the encoding used for torrent files
 class BencodeParser {
 
   fun parseBencodeFile(path: Path) {
@@ -10,77 +13,70 @@ class BencodeParser {
     bytes.forEach { print(it.toChar().toString()) }
     println()
 
-    var pos = 0
-    while (pos < bytes.size) {
-      pos = readNextObject(pos, bytes)
-      pos++
+    path.inputStream().use { inputStream ->
+      var pos = 0
+      while (pos != -1) {
+        pos = readNextObject(inputStream)
+      }
     }
   }
 
-  private fun readNextObject(startPos: Int, bytes: ByteArray): Int {
-    if (startPos >= bytes.size || bytes[startPos].toInt().toChar() == 'e') {
-      println("DONE")
-      return startPos
+  private fun readNextObject(inputStream: InputStream): Int {
+    val currentByte = inputStream.read()
+    if (currentByte == -1 || currentByte.toChar() == 'e') {
+      println("End of object")
+      return -1
     }
-    var pos = startPos
-    val currentByte = bytes[pos]
     when (currentByte.asBencodeType()) {
-      BencodeType.INTEGER -> {
-        // drop prefix
-        pos++
-        val numberEndIndex = bytes.firstIndexFrom(pos) { it == 'e'.code.toByte() }
-        val number = String(bytes.copyOfRange(pos, numberEndIndex))
-        // drop suffix
-        pos = numberEndIndex + 1
+      BencodeType.NUMBER -> {
+        val number = inputStream.readLong('e')!!
         println("Number found: $number")
       }
       BencodeType.BYTE_STRING -> {
-        val lengthEndIndex = bytes.firstIndexFrom(pos) { it == ':'.code.toByte() }
-        val length = String(bytes.copyOfRange(pos, lengthEndIndex)).toInt()
-        val string = String(bytes.copyOfRange(lengthEndIndex + 1, lengthEndIndex + 1 + length))
-        pos = lengthEndIndex + 1 + length
+        val lengthString = inputStream.readLong(':')
+        val length = (currentByte.toChar().toString() + lengthString).toInt()
+        val string = String(inputStream.readNBytes(length))
         println("New String found: $string")
       }
       BencodeType.LIST -> {
-        // drop prefix
-        pos++
-        pos = readNextObject(pos, bytes)
+        //        pos = readNextObject(pos, bytes)
         // drop suffix
-        pos++
+        inputStream.read()
         println("New list entry found")
       }
       BencodeType.DICTIONARY -> {
-        // drop prefix
-        pos++
-        while (pos < bytes.size && bytes[pos].toInt().toChar() != 'e') {
-          val lengthEndIndex = bytes.firstIndexFrom(pos) { it == ':'.code.toByte() }
-          val length = String(bytes.copyOfRange(pos, lengthEndIndex)).toInt()
-          val keyEndIndex = lengthEndIndex + 1 + length
-          val key = String(bytes.copyOfRange(lengthEndIndex + 1, keyEndIndex))
+        while (true) {
+          val keyLength = inputStream.readLong(':')?.toInt() ?: break
+          val key = String(inputStream.readNBytes(keyLength))
           println("Dictionary key: $key")
-          pos = readNextObject(keyEndIndex, bytes)
-          val a = 5
+          readNextObject(inputStream)
         }
       }
     }
-    return pos
+    return currentByte
   }
-}
 
-fun Byte.asBencodeType(): BencodeType {
-  return when (this.toInt().toChar()) {
-    'd' -> BencodeType.DICTIONARY
-    'l' -> BencodeType.LIST
-    'i' -> BencodeType.INTEGER
-    else -> BencodeType.BYTE_STRING
-  }
-}
-
-fun ByteArray.firstIndexFrom(offset: Int, predicate: (Byte) -> Boolean): Int {
-  (offset..this.size).forEach { index ->
-    if (predicate(this[index])) {
-      return index
+  private fun InputStream.readLong(endSuffix: Char): Long? {
+    var numberString = ""
+    while (true) {
+      val byte = this.read().toChar()
+      if (byte == endSuffix || byte == 'e') {
+        break
+      }
+      numberString += byte
+    }
+    return when {
+      numberString.isEmpty() -> null
+      else -> numberString.toLong()
     }
   }
-  return -1
+}
+
+fun Int.asBencodeType(): BencodeType {
+  return when (this.toChar()) {
+    'd' -> BencodeType.DICTIONARY
+    'l' -> BencodeType.LIST
+    'i' -> BencodeType.NUMBER
+    else -> BencodeType.BYTE_STRING
+  }
 }

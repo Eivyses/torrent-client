@@ -8,7 +8,7 @@ data class TorrentData(
 )
 
 enum class BencodeType {
-  INTEGER,
+  NUMBER,
   LIST,
   DICTIONARY,
   BYTE_STRING
