@@ -1,8 +1,11 @@
-fun main(args: Array<String>) {
+import core.reading.TorrentReader
+import java.nio.file.Path
+
+fun main() {
   println("Hello World!")
 
-  // Try adding program arguments via Run/Debug configuration.
-  // Learn more about running applications:
-  // https://www.jetbrains.com/help/idea/running-applications.html.
-  println("Program arguments: ${args.joinToString()}")
+  val reader = TorrentReader()
+  reader.readTorrentFile(
+      Path.of(
+          "C:\\Users\\Eivys\\Downloads\\The.Last.of.Us.S01E01.When.Youre.Lost.in.the.Darkness.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTb.mkv.torrent"))
 }
