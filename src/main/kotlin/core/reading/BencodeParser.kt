@@ -3,15 +3,14 @@ package core.reading
 import java.io.InputStream
 import java.nio.file.Path
 import kotlin.io.path.inputStream
+import mu.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 // bencode is the encoding used for torrent files
 class BencodeParser {
 
   fun parseBencodeFile(path: Path) {
-    //    val bytes = path.readBytes()
-    //    bytes.forEach { print(it.toChar().toString()) }
-    //    println()
-
     val map = mutableMapOf<String, Any>()
     path.inputStream().use { inputStream ->
       while (true) {
@@ -26,20 +25,20 @@ class BencodeParser {
   private fun readNextObject(inputStream: InputStream): Any? {
     val currentByte = inputStream.read()
     if (currentByte == -1 || currentByte.toChar() == 'e') {
-      println("End of object")
+      logger.trace { "End of object" }
       return null
     }
     when (currentByte.asBencodeType()) {
       BencodeType.NUMBER -> {
         val number = inputStream.readLong('e')!!
-        //        println("Number found: $number")
+        logger.trace { "Number found: $number" }
         return number
       }
       BencodeType.BYTE_STRING -> {
         val lengthString = inputStream.readLong(':')
         val length = (currentByte.toChar().toString() + lengthString).toInt()
         val string = String(inputStream.readNBytes(length))
-        //        println("New String found: $string")
+        logger.trace { "New String found: $string" }
         return string
       }
       BencodeType.LIST -> {
@@ -50,7 +49,8 @@ class BencodeParser {
         while (true) {
           val keyLength = inputStream.readLong(':')?.toInt() ?: break
           val key = String(inputStream.readNBytes(keyLength))
-          //          println("Dictionary key: $key")
+
+          logger.trace { "Dictionary key: $key" }
           val value = readNextObject(inputStream)!!
           map[key] = value
         }
