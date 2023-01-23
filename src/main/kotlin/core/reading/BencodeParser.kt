@@ -8,6 +8,7 @@ import mu.KotlinLogging
 private val logger = KotlinLogging.logger {}
 
 // bencode is the encoding used for torrent files
+// https://en.wikipedia.org/wiki/Bencode
 class BencodeParser {
 
   fun parseBencodeFile(path: Path) {
@@ -30,11 +31,13 @@ class BencodeParser {
     }
     when (currentByte.asBencodeType()) {
       BencodeType.NUMBER -> {
+        // number format: i<number>e
         val number = inputStream.readLong('e')!!
         logger.trace { "Number found: $number" }
         return number
       }
       BencodeType.BYTE_STRING -> {
+        // byte string format: <length>:<content>, we did already read first digit of the number
         val lengthString = inputStream.readLong(':')
         val length = (currentByte.toChar().toString() + lengthString).toInt()
         val string = String(inputStream.readNBytes(length))
@@ -42,9 +45,12 @@ class BencodeParser {
         return string
       }
       BencodeType.LIST -> {
+        // list format: l<content>e
         TODO("Implement")
       }
       BencodeType.DICTIONARY -> {
+        // dictionary format: d<content>e
+        // content key is always BYTE_STRING, value can be anything
         val map = mutableMapOf<String, Any>()
         while (true) {
           val keyLength = inputStream.readLong(':')?.toInt() ?: break
@@ -63,6 +69,7 @@ class BencodeParser {
     var numberString = ""
     while (true) {
       val byte = this.read().toChar()
+      // additional escape in case we're reading end of complex object
       if (byte == endSuffix || byte == 'e') {
         break
       }
