@@ -1,10 +1,13 @@
 package core.reading
 
-data class TorrentData(
-    val numbers: MutableList<Int>,
-    val strings: MutableList<String>,
-    val lists: MutableList<MutableList<String>>,
-    val maps: MutableMap<String, Any>
+data class TorrentData(val urls: List<String>, val torrentInfo: TorrentInfo)
+
+data class TorrentInfo(
+    val files: List<String>,
+    val length: Long,
+    val name: String,
+    val pieceLength: Long,
+    val pieces: List<ByteArray>
 )
 
 enum class BencodeType {

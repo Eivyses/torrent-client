@@ -11,7 +11,7 @@ private val logger = KotlinLogging.logger {}
 // https://en.wikipedia.org/wiki/Bencode
 class BencodeParser {
 
-  fun parseBencodeFile(path: Path) {
+  fun parseBencodeFile(path: Path): Map<String, Any> {
     val map = mutableMapOf<String, Any>()
     path.inputStream().use { inputStream ->
       while (true) {
@@ -21,6 +21,7 @@ class BencodeParser {
         }
       }
     }
+    return map.toMap()
   }
 
   private fun readNextObject(inputStream: InputStream): Any? {
@@ -40,9 +41,10 @@ class BencodeParser {
         // byte string format: <length>:<content>, we did already read first digit of the number
         val lengthString = inputStream.readLong(':')
         val length = (currentByte.toChar().toString() + lengthString).toInt()
-        val string = String(inputStream.readNBytes(length))
+        val bytes = inputStream.readNBytes(length)
+        val string = String(bytes)
         logger.trace { "New String found: $string" }
-        return string
+        return bytes
       }
       BencodeType.LIST -> {
         // list format: l<content>e
