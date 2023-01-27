@@ -1,7 +1,6 @@
 package core.reading
 
 import java.nio.file.Path
-import kotlin.io.path.exists
 import kotlin.io.path.readBytes
 import mu.KotlinLogging
 
@@ -13,7 +12,6 @@ class TorrentReader {
   private val parser = BencodeParser()
 
   fun readTorrentFile(path: Path): TorrentData {
-    logger.debug { "exists: ${path.exists()}" }
     val parsedMap = parser.parseBencodeFile(path)
     val urls = String(parsedMap.getValue("announce") as ByteArray)
 

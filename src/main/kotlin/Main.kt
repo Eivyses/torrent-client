@@ -6,6 +6,5 @@ fun main() {
 
   val reader = TorrentReader()
   reader.readTorrentFile(
-      Path.of(
-          "C:\\Users\\Eivys\\Downloads\\The.Last.of.Us.S01E01.When.Youre.Lost.in.the.Darkness.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTb.mkv.torrent"))
+      Path.of("C:\\Users\\Eivys\\Downloads\\linuxmint-21.1-cinnamon-64bit.iso.torrent"))
 }

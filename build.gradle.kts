@@ -12,7 +12,7 @@ version = "1.0-SNAPSHOT"
 repositories { mavenCentral() }
 
 dependencies {
-  testImplementation(kotlin("test"))
+  testImplementation(kotlin("test-junit"))
   implementation("io.github.microutils:kotlin-logging-jvm:3.0.4")
   implementation("ch.qos.logback:logback-classic:1.4.5")
 }
