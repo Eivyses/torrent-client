@@ -1,6 +1,11 @@
 package core.reading
 
-data class TorrentData(val urls: List<String>, val torrentInfo: TorrentInfo)
+data class TorrentData(
+    val urls: List<String>,
+    val createdBy: String,
+    val creationDate: Long,
+    val torrentInfo: TorrentInfo
+)
 
 data class TorrentInfo(
     val files: List<String>,

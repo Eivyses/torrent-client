@@ -15,6 +15,8 @@ class TorrentReader {
   fun readTorrentFile(path: Path): TorrentData {
     val parsedMap = parser.parseBencodeFile(path)
     val urls = String(parsedMap.getValue("announce") as ByteArray)
+    val createdBy = String(parsedMap.getValue("created by") as ByteArray)
+    val creationDate = parsedMap.getValue("creation date") as Long
 
     val infoMap = parsedMap.getValue("info") as Map<String, Any>
     val files: List<String> = infoMap.getOrElse("files") { emptyList<String>() } as List<String>
@@ -43,7 +45,12 @@ class TorrentReader {
             pieceLength = pieceLength,
             pieces = pieces,
             hash = hash)
-    val torrentData = TorrentData(urls = listOf(urls), torrentInfo = torrentInfo)
+    val torrentData =
+        TorrentData(
+            urls = listOf(urls),
+            createdBy = createdBy,
+            creationDate = creationDate,
+            torrentInfo = torrentInfo)
     logger.debug { "Torrent file read: $torrentData" }
     return torrentData
   }
