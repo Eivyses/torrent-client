@@ -39,7 +39,7 @@ class BencodeParser {
       }
       BencodeType.BYTE_STRING -> {
         // byte string format: <length>:<content>, we did already read first digit of the number
-        val lengthString = inputStream.readLong(':')
+        val lengthString = inputStream.readLong(':') ?: ""
         val length = (currentByte.toChar().toString() + lengthString).toInt()
         val bytes = inputStream.readNBytes(length)
         val string = String(bytes)
