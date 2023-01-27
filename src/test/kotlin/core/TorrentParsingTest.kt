@@ -22,6 +22,7 @@ class TorrentParsingTest {
     assertEquals("linuxmint-21.1-cinnamon-64bit.iso", torrentData.torrentInfo.name)
     assertTrue(torrentData.torrentInfo.files.isEmpty())
     assertEquals(1279, torrentData.torrentInfo.pieces.size)
+    assertEquals("b0a64119022786e4f6a0bfd797158ee0e006a8dd", torrentData.torrentInfo.hash)
     // TODO: figure a way to handle lengths as they are in bytes
     assertEquals(2494654, torrentData.torrentInfo.length)
     assertEquals(1256412, torrentData.torrentInfo.pieceLength)

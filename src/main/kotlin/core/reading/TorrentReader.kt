@@ -1,5 +1,6 @@
 package core.reading
 
+import core.crypto.hashAsSHA1
 import java.nio.file.Path
 import kotlin.io.path.readBytes
 import mu.KotlinLogging
@@ -36,7 +37,12 @@ class TorrentReader {
 
     val torrentInfo =
         TorrentInfo(
-            files = files, length = length, name = name, pieceLength = pieceLength, pieces = pieces)
+            files = files,
+            length = length,
+            name = name,
+            pieceLength = pieceLength,
+            pieces = pieces,
+            hash = hash)
     val torrentData = TorrentData(urls = listOf(urls), torrentInfo = torrentInfo)
     logger.debug { "Torrent file read: $torrentData" }
     return torrentData
@@ -48,7 +54,7 @@ class TorrentReader {
     val searchString = "4:info"
     val infoOffset = bytes.findFirst(searchString.toByteArray())
     val infoMap = bytes.copyOfRange(infoOffset + searchString.length, bytes.size - 1)
-    throw RuntimeException("Hash parsing failed")
+    return hashAsSHA1(infoMap)
   }
 }
 
