@@ -84,9 +84,9 @@ class TorrentReader {
         infoMap.getOrElse("files") { emptyList<Map<String, Any>>() } as List<Map<String, Any>>
     filesMap.forEach {
       val length = it.getValue("length") as Long
-      // TODO: check multi directories, might be in this list
       val paths = it.getValue("path") as List<ByteArray>
-      files.add(TorrentFile(String(paths[0]), length))
+      val fullPath = paths.joinToString("/") { path -> String(path) }
+      files.add(TorrentFile(fullPath, length))
     }
     return files.toList()
   }

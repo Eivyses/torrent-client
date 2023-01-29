@@ -85,5 +85,39 @@ class TorrentParsingTest {
     assertEquals(64.0, torrentData.torrentInfo.pieceLength.convertTo(ByteSize.KIBIBYTE))
   }
 
-  // TODO: add multi directory test
+  @Test
+  fun testNestedFilesTorrentParsing() {
+    val torrentFile =
+        TorrentParsingTest::class
+            .java
+            .getResource("/reading/nestedFiles.torrent")!!
+            .toURI()
+            .toPath()
+    val torrentReader = TorrentReader()
+
+    val torrentData = torrentReader.readTorrentFile(torrentFile)
+    assertEquals("kimbatt.github.io/torrent-creator", torrentData.createdBy)
+    assertEquals(1675008843, torrentData.creationDate)
+    assertEquals(
+        listOf(
+            "udp://exodus.desync.com:6969/announce",
+            "https://opentracker.i2p.rocks:443/announce",
+            "udp://open.demonii.com:1337/announce"),
+        torrentData.urls)
+
+    assertEquals(
+        listOf(
+            TorrentFile("Info/Eula.txt", 7490),
+            TorrentFile("Info/notes/notes.txt", 7490),
+            TorrentFile("main/procexp.chm", 72154),
+            TorrentFile("main/procexp.exe", 2834320),
+            TorrentFile("main/procexp64.exe", 1505160),
+            TorrentFile("main/procexp64a.exe", 1493376)),
+        torrentData.torrentInfo.files)
+    assertEquals("ProcessExplorerV2", torrentData.torrentInfo.name)
+    assertEquals(362, torrentData.torrentInfo.pieces.size)
+    assertEquals("0f3eadae8646ad3303ba2f728179b7fd8e637e28", torrentData.torrentInfo.hash)
+    assertEquals(5.64, torrentData.torrentInfo.length.convertTo(ByteSize.MEBIBYTE))
+    assertEquals(16.0, torrentData.torrentInfo.pieceLength.convertTo(ByteSize.KIBIBYTE))
+  }
 }
