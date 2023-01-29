@@ -14,13 +14,13 @@ class TorrentReader {
 
   fun readTorrentFile(path: Path): TorrentData {
     val parsedMap = parser.parseBencodeFile(path)
-    val urls = String(parsedMap.getValue("announce") as ByteArray)
+    val urls = getUrls(parsedMap)
     val createdBy = String(parsedMap.getValue("created by") as ByteArray)
     val creationDate = parsedMap.getValue("creation date") as Long
 
     val infoMap = parsedMap.getValue("info") as Map<String, Any>
-    val files: List<String> = infoMap.getOrElse("files") { emptyList<String>() } as List<String>
-    val length = infoMap.getValue("length") as Long
+    val files = getFiles(infoMap)
+    val length = (infoMap["length"] ?: files.sumOf { it.length }) as Long
     val name = String(infoMap.getValue("name") as ByteArray)
 
     // number of bytes per piece in bytes
@@ -47,7 +47,7 @@ class TorrentReader {
             hash = hash)
     val torrentData =
         TorrentData(
-            urls = listOf(urls),
+            urls = urls,
             createdBy = createdBy,
             creationDate = creationDate,
             torrentInfo = torrentInfo)
@@ -62,6 +62,33 @@ class TorrentReader {
     val infoOffset = bytes.findFirst(searchString.toByteArray())
     val infoMap = bytes.copyOfRange(infoOffset + searchString.length, bytes.size - 1)
     return hashAsSHA1(infoMap)
+  }
+
+  private fun getUrls(parsedMap: Map<String, Any>): List<String> {
+    val baseUrl = String(parsedMap.getValue("announce") as ByteArray)
+    val urls = mutableListOf(baseUrl)
+    val additionalUrls =
+        parsedMap.getOrElse("announce-list") { emptyList<List<ByteArray>>() }
+            as List<List<ByteArray>>
+    additionalUrls
+        .flatten()
+        .map { String(it) }
+        .filter { !urls.contains(it) }
+        .forEach { urls.add(it) }
+    return urls.toList()
+  }
+
+  private fun getFiles(infoMap: Map<String, Any>): List<TorrentFile> {
+    val files = mutableListOf<TorrentFile>()
+    val filesMap =
+        infoMap.getOrElse("files") { emptyList<Map<String, Any>>() } as List<Map<String, Any>>
+    filesMap.forEach {
+      val length = it.getValue("length") as Long
+      // TODO: check multi directories, might be in this list
+      val paths = it.getValue("path") as List<ByteArray>
+      files.add(TorrentFile(String(paths[0]), length))
+    }
+    return files.toList()
   }
 }
 

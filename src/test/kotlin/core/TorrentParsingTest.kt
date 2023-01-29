@@ -2,6 +2,7 @@ package core
 
 import core.convertion.ByteSize
 import core.convertion.convertTo
+import core.reading.TorrentFile
 import core.reading.TorrentReader
 import kotlin.io.path.toPath
 import kotlin.test.assertEquals
@@ -37,22 +38,21 @@ class TorrentParsingTest {
 
     val torrentData = torrentReader.readTorrentFile(torrentFile)
     assertEquals("kimbatt.github.io/torrent-creator", torrentData.createdBy)
-    assertEquals(1674837180, torrentData.creationDate)
-    assertEquals(
-        listOf(
-            "udp://tracker.opentrackr.org:1337/announce",
-            "udp://9.rarbg.com:2810/announce",
-            "udp://tracker.torrent.eu.org:451/announce",
-            "udp://opentracker.i2p.rocks:6969/announce"),
-        torrentData.urls)
+    assertEquals(1674844412, torrentData.creationDate)
+    assertEquals(listOf("udp://tracker.opentrackr.org:1337/announce"), torrentData.urls)
 
     assertEquals(
-        listOf("procexp64a.exe", "procexp64.exe", "procexp.exe", "procexp.chm", "Eula.txt"),
+        listOf(
+            TorrentFile("Eula.txt", 7490),
+            TorrentFile("procexp.chm", 72154),
+            TorrentFile("procexp.exe", 2834320),
+            TorrentFile("procexp64.exe", 1505160),
+            TorrentFile("procexp64a.exe", 1493376)),
         torrentData.torrentInfo.files)
     assertEquals("ProcessExplorer", torrentData.torrentInfo.name)
     assertEquals(361, torrentData.torrentInfo.pieces.size)
     assertEquals("7319bc061301f687f555954935dde0a03730d433", torrentData.torrentInfo.hash)
-    assertEquals(5.60, torrentData.torrentInfo.length.convertTo(ByteSize.MEBIBYTE))
+    assertEquals(5.63, torrentData.torrentInfo.length.convertTo(ByteSize.MEBIBYTE))
     assertEquals(16.0, torrentData.torrentInfo.pieceLength.convertTo(ByteSize.KIBIBYTE))
   }
 
@@ -68,14 +68,22 @@ class TorrentParsingTest {
 
     val torrentData = torrentReader.readTorrentFile(torrentFile)
     assertEquals("kimbatt.github.io/torrent-creator", torrentData.createdBy)
-    assertEquals(1674837120, torrentData.creationDate)
-    assertEquals(listOf("udp://tracker.opentrackr.org:1337/announce"), torrentData.urls)
+    assertEquals(1674844347, torrentData.creationDate)
+    assertEquals(
+        listOf(
+            "udp://tracker.opentrackr.org:1337/announce",
+            "udp://9.rarbg.com:2810/announce",
+            "udp://tracker.torrent.eu.org:451/announce",
+            "udp://opentracker.i2p.rocks:6969/announce"),
+        torrentData.urls)
 
     assertTrue(torrentData.torrentInfo.files.isEmpty())
     assertEquals("webos-dev-manager.1.8.2.exe", torrentData.torrentInfo.name)
     assertEquals(935, torrentData.torrentInfo.pieces.size)
     assertEquals("2c469eb1c21c1aeaa444efc965add4e7e5ef5bd1", torrentData.torrentInfo.hash)
-    assertEquals(58.3, torrentData.torrentInfo.length.convertTo(ByteSize.MEBIBYTE))
+    assertEquals(58.38, torrentData.torrentInfo.length.convertTo(ByteSize.MEBIBYTE))
     assertEquals(64.0, torrentData.torrentInfo.pieceLength.convertTo(ByteSize.KIBIBYTE))
   }
+
+  // TODO: add multi directory test
 }

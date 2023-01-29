@@ -8,13 +8,15 @@ data class TorrentData(
 )
 
 data class TorrentInfo(
-    val files: List<String>,
+    val files: List<TorrentFile>,
     val length: Long,
     val name: String,
     val pieceLength: Long,
     val hash: String,
     val pieces: List<ByteArray>
 )
+
+data class TorrentFile(val name: String, val length: Long)
 
 enum class BencodeType {
   NUMBER,

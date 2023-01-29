@@ -27,7 +27,6 @@ class BencodeParser {
   private fun readNextObject(inputStream: InputStream): Any? {
     val currentByte = inputStream.read()
     if (currentByte == -1 || currentByte.toChar() == 'e') {
-      logger.trace { "End of object" }
       return null
     }
     when (currentByte.asBencodeType()) {
@@ -48,7 +47,13 @@ class BencodeParser {
       }
       BencodeType.LIST -> {
         // list format: l<content>e
-        TODO("Implement")
+        // list can contain anything
+        val list = mutableListOf<Any>()
+        while (true) {
+          val nextValue = readNextObject(inputStream) ?: break
+          list.add(nextValue)
+        }
+        return list
       }
       BencodeType.DICTIONARY -> {
         // dictionary format: d<content>e
