@@ -2,11 +2,11 @@ package core.crypto
 
 import java.security.MessageDigest
 
-fun hashAsSHA1(data: ByteArray): String {
+fun hashAsSHA1(data: ByteArray): ByteArray {
   val md = MessageDigest.getInstance("SHA-1")
   md.update(data, 0, data.size)
   val sha1hash: ByteArray = md.digest()
-  return convertToHex(sha1hash)
+  return sha1hash
 }
 
 fun convertToHex(data: ByteArray): String {

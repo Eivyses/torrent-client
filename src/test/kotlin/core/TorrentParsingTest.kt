@@ -4,10 +4,10 @@ import core.convertion.ByteSize
 import core.convertion.convertTo
 import core.reading.TorrentFile
 import core.reading.TorrentReader
+import org.junit.Test
 import kotlin.io.path.toPath
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import org.junit.Test
 
 class TorrentParsingTest {
 
@@ -25,7 +25,7 @@ class TorrentParsingTest {
     assertTrue(torrentData.torrentInfo.files.isEmpty())
     assertEquals("linuxmint-21.1-cinnamon-64bit.iso", torrentData.torrentInfo.name)
     assertEquals(1279, torrentData.torrentInfo.pieces.size)
-    assertEquals("b0a64119022786e4f6a0bfd797158ee0e006a8dd", torrentData.torrentInfo.hash)
+    assertEquals("b0a64119022786e4f6a0bfd797158ee0e006a8dd", torrentData.torrentInfo.hashString)
     assertEquals(2.49, torrentData.torrentInfo.length.convertTo(ByteSize.GIBIBYTE))
     assertEquals(2.0, torrentData.torrentInfo.pieceLength.convertTo(ByteSize.MEBIBYTE))
   }
@@ -51,7 +51,7 @@ class TorrentParsingTest {
         torrentData.torrentInfo.files)
     assertEquals("ProcessExplorer", torrentData.torrentInfo.name)
     assertEquals(361, torrentData.torrentInfo.pieces.size)
-    assertEquals("7319bc061301f687f555954935dde0a03730d433", torrentData.torrentInfo.hash)
+    assertEquals("7319bc061301f687f555954935dde0a03730d433", torrentData.torrentInfo.hashString)
     assertEquals(5.63, torrentData.torrentInfo.length.convertTo(ByteSize.MEBIBYTE))
     assertEquals(16.0, torrentData.torrentInfo.pieceLength.convertTo(ByteSize.KIBIBYTE))
   }
@@ -80,7 +80,7 @@ class TorrentParsingTest {
     assertTrue(torrentData.torrentInfo.files.isEmpty())
     assertEquals("webos-dev-manager.1.8.2.exe", torrentData.torrentInfo.name)
     assertEquals(935, torrentData.torrentInfo.pieces.size)
-    assertEquals("2c469eb1c21c1aeaa444efc965add4e7e5ef5bd1", torrentData.torrentInfo.hash)
+    assertEquals("2c469eb1c21c1aeaa444efc965add4e7e5ef5bd1", torrentData.torrentInfo.hashString)
     assertEquals(58.38, torrentData.torrentInfo.length.convertTo(ByteSize.MEBIBYTE))
     assertEquals(64.0, torrentData.torrentInfo.pieceLength.convertTo(ByteSize.KIBIBYTE))
   }
@@ -116,7 +116,7 @@ class TorrentParsingTest {
         torrentData.torrentInfo.files)
     assertEquals("ProcessExplorerV2", torrentData.torrentInfo.name)
     assertEquals(362, torrentData.torrentInfo.pieces.size)
-    assertEquals("0f3eadae8646ad3303ba2f728179b7fd8e637e28", torrentData.torrentInfo.hash)
+    assertEquals("0f3eadae8646ad3303ba2f728179b7fd8e637e28", torrentData.torrentInfo.hashString)
     assertEquals(5.64, torrentData.torrentInfo.length.convertTo(ByteSize.MEBIBYTE))
     assertEquals(16.0, torrentData.torrentInfo.pieceLength.convertTo(ByteSize.KIBIBYTE))
   }

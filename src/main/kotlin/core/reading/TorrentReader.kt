@@ -1,5 +1,6 @@
 package core.reading
 
+import core.crypto.convertToHex
 import core.crypto.hashAsSHA1
 import mu.KotlinLogging
 import java.nio.file.Path
@@ -44,7 +45,8 @@ class TorrentReader {
             name = name,
             pieceLength = pieceLength,
             pieces = pieces,
-            hash = hash)
+            hash = hash,
+            hashString = convertToHex(hash))
     val torrentData =
         TorrentData(
             urls = urls,
@@ -56,7 +58,7 @@ class TorrentReader {
   }
 
   // torrent hash is calculated over the content of the `info` dictionary in bencode form
-  private fun getTorrentHash(path: Path): String {
+  private fun getTorrentHash(path: Path): ByteArray {
     val bytes = path.readBytes()
     val searchString = "4:info"
     val infoOffset = bytes.findFirstMatchIndex(searchString.toByteArray())
