@@ -1,9 +1,9 @@
 package core.reading
 
 import core.crypto.hashAsSHA1
+import mu.KotlinLogging
 import java.nio.file.Path
 import kotlin.io.path.readBytes
-import mu.KotlinLogging
 
 private val logger = KotlinLogging.logger {}
 
@@ -15,13 +15,13 @@ class TorrentReader {
   fun readTorrentFile(path: Path): TorrentData {
     val parsedMap = parser.parseBencodeFile(path)
     val urls = getUrls(parsedMap)
-    val createdBy = String(parsedMap.getValue("created by") as ByteArray)
+    val createdBy = parsedMap.getValueAsParsedString("created by")
     val creationDate = parsedMap.getValue("creation date") as Long
 
     val infoMap = parsedMap.getValue("info") as Map<String, Any>
     val files = getFiles(infoMap)
     val length = (infoMap["length"] ?: files.sumOf { it.length }) as Long
-    val name = String(infoMap.getValue("name") as ByteArray)
+    val name = infoMap.getValueAsParsedString("name")
 
     // number of bytes per piece in bytes
     val pieceLength = infoMap.getValue("piece length") as Long
@@ -65,7 +65,7 @@ class TorrentReader {
   }
 
   private fun getUrls(parsedMap: Map<String, Any>): List<String> {
-    val baseUrl = String(parsedMap.getValue("announce") as ByteArray)
+    val baseUrl = parsedMap.getValueAsParsedString("announce")
     val urls = mutableListOf(baseUrl)
     val additionalUrls =
         parsedMap.getOrElse("announce-list") { emptyList<List<ByteArray>>() }
@@ -90,6 +90,10 @@ class TorrentReader {
     }
     return files.toList()
   }
+}
+
+private fun Map<String, Any>.getValueAsParsedString(key: String): String {
+  return String(this.getValue(key) as ByteArray)
 }
 
 private fun ByteArray.findFirst(sequence: ByteArray): Int {
