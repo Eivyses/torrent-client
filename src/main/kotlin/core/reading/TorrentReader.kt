@@ -59,7 +59,7 @@ class TorrentReader {
   private fun getTorrentHash(path: Path): String {
     val bytes = path.readBytes()
     val searchString = "4:info"
-    val infoOffset = bytes.findFirst(searchString.toByteArray())
+    val infoOffset = bytes.findFirstMatchIndex(searchString.toByteArray())
     val infoMap = bytes.copyOfRange(infoOffset + searchString.length, bytes.size - 1)
     return hashAsSHA1(infoMap)
   }
@@ -96,7 +96,7 @@ private fun Map<String, Any>.getValueAsParsedString(key: String): String {
   return String(this.getValue(key) as ByteArray)
 }
 
-private fun ByteArray.findFirst(sequence: ByteArray): Int {
+private fun ByteArray.findFirstMatchIndex(sequence: ByteArray): Int {
   var matchOffset = 0
   var start = 0
   var offset = 0

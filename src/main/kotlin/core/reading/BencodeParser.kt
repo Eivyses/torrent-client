@@ -32,13 +32,13 @@ class BencodeParser {
     when (currentByte.asBencodeType()) {
       BencodeType.NUMBER -> {
         // number format: i<number>e
-        val number = inputStream.readLong('e')!!
+        val number = inputStream.readLongUntilSuffix('e')!!
         logger.trace { "Number found: $number" }
         return number
       }
       BencodeType.BYTE_STRING -> {
         // byte string format: <length>:<content>, we did already read first digit of the number
-        val lengthString = inputStream.readLong(':') ?: ""
+        val lengthString = inputStream.readLongUntilSuffix(':') ?: ""
         val length = (currentByte.toChar().toString() + lengthString).toInt()
         val bytes = inputStream.readNBytes(length)
         val string = String(bytes)
@@ -60,7 +60,7 @@ class BencodeParser {
         // content key is always BYTE_STRING, value can be anything
         val map = mutableMapOf<String, Any>()
         while (true) {
-          val keyLength = inputStream.readLong(':')?.toInt() ?: break
+          val keyLength = inputStream.readLongUntilSuffix(':')?.toInt() ?: break
           val key = String(inputStream.readNBytes(keyLength))
 
           logger.trace { "Dictionary key: $key" }
@@ -72,7 +72,7 @@ class BencodeParser {
     }
   }
 
-  private fun InputStream.readLong(endSuffix: Char): Long? {
+  private fun InputStream.readLongUntilSuffix(endSuffix: Char): Long? {
     var numberString = ""
     while (true) {
       val byte = this.read().toChar()
