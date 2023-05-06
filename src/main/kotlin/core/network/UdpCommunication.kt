@@ -88,7 +88,7 @@ fun parseAnnounceResponse(bytes: ByteArray): AnnounceResponse {
   // TODO: reading these is different :/
   val seeders = ByteBuffer.wrap(bytes.copyOfRange(16, 20)).getInt()
   val ipAddress = ByteBuffer.wrap(bytes.copyOfRange(20, 24)).getInt()
-  val tcpPort = ByteBuffer.wrap(bytes.copyOfRange(24, 28)).getInt()
+  val tcpPort = ByteBuffer.wrap(bytes.copyOfRange(24, 28)).getShort()
   return AnnounceResponse(
       action = action,
       transactionId = transactionId,
