@@ -43,6 +43,10 @@ data class TorrentInfo(
     result = 31 * result + pieces.hashCode()
     return result
   }
+
+  override fun toString(): String {
+    return "TorrentInfo(files=$files, length=$length, name='$name', pieceLength=$pieceLength, hashString='$hashString', pieces=${pieces.size})"
+  }
 }
 
 data class TorrentFile(val name: String, val length: Long)
