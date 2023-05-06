@@ -85,8 +85,8 @@ fun parseAnnounceResponse(bytes: ByteArray): AnnounceResponse {
   val transactionId = ByteBuffer.wrap(bytes.copyOfRange(4, 8)).getInt()
   val interval = ByteBuffer.wrap(bytes.copyOfRange(8, 12)).getInt()
   val leechers = ByteBuffer.wrap(bytes.copyOfRange(12, 16)).getInt()
-  // TODO: reading these is different :/
   val seeders = ByteBuffer.wrap(bytes.copyOfRange(16, 20)).getInt()
+  // TODO: reading these is different :/
   val ipAddress = ByteBuffer.wrap(bytes.copyOfRange(20, 24)).getInt()
   val tcpPort = ByteBuffer.wrap(bytes.copyOfRange(24, 28)).getShort()
   return AnnounceResponse(
