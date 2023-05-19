@@ -26,9 +26,9 @@ fun parseConnectionResponse(bytes: ByteArray): ConnectionResponse {
   // 4       32-bit integer  transaction_id
   // 8       64-bit integer  connection_id
   // 16
-  val action = ByteBuffer.wrap(bytes.copyOfRange(0, 4)).getInt()
-  val transactionId = ByteBuffer.wrap(bytes.copyOfRange(4, 8)).getInt()
-  val connectionId = ByteBuffer.wrap(bytes.copyOfRange(8, 16)).getLong()
+  val action = ByteBuffer.wrap(bytes, 0, 4).getInt()
+  val transactionId = ByteBuffer.wrap(bytes, 4, 4).getInt()
+  val connectionId = ByteBuffer.wrap(bytes, 8, 8).getLong()
   return ConnectionResponse(
       action = action, transactionId = transactionId, connectionId = connectionId)
 }
@@ -81,20 +81,34 @@ fun parseAnnounceResponse(bytes: ByteArray): AnnounceResponse {
   // 20 + 6 * n  32-bit integer  IP address
   // 24 + 6 * n  16-bit integer  TCP port
   // 20 + 6 * N
-  val action = ByteBuffer.wrap(bytes.copyOfRange(0, 4)).getInt()
-  val transactionId = ByteBuffer.wrap(bytes.copyOfRange(4, 8)).getInt()
-  val interval = ByteBuffer.wrap(bytes.copyOfRange(8, 12)).getInt()
-  val leechers = ByteBuffer.wrap(bytes.copyOfRange(12, 16)).getInt()
-  val seeders = ByteBuffer.wrap(bytes.copyOfRange(16, 20)).getInt()
-  // TODO: reading these is different :/
-  val ipAddress = ByteBuffer.wrap(bytes.copyOfRange(20, 24)).getInt()
-  val tcpPort = ByteBuffer.wrap(bytes.copyOfRange(24, 28)).getShort()
+  val action = ByteBuffer.wrap(bytes, 0, 4).getInt()
+  val transactionId = ByteBuffer.wrap(bytes, 4, 4).getInt()
+  val interval = ByteBuffer.wrap(bytes, 8, 4).getInt()
+  val leechers = ByteBuffer.wrap(bytes, 12, 4).getInt()
+  val seeders = ByteBuffer.wrap(bytes, 16, 4).getInt()
+
+  var startByte = 20
+  val peers = mutableListOf<Pair<String, UShort>>()
+  while (startByte < bytes.size) {
+    val portStart = startByte + 4
+    val ipAddress = bytes.parseIp(startByte)
+    val tcpPort = ByteBuffer.wrap(bytes, portStart, 2).getShort().toUShort()
+    if (ipAddress == "0.0.0.0" && tcpPort.toInt() == 0) {
+      break
+    }
+    peers += ipAddress to tcpPort
+    startByte += 6
+  }
+
   return AnnounceResponse(
       action = action,
       transactionId = transactionId,
       interval = interval,
       leechers = leechers,
       seeders = seeders,
-      ipAddress = ipAddress,
-      tcpPort = tcpPort)
+      peers = peers)
 }
+
+// parse each byte of 4 as separate value and join them to string
+fun ByteArray.parseIp(idx: Int) =
+    (0 until 4).joinToString(separator = ".") { this[it + idx].toUByte().toString() }

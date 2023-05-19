@@ -11,6 +11,5 @@ data class AnnounceResponse(
     val interval: Int,
     val leechers: Int,
     val seeders: Int,
-    val ipAddress: Int, // TODO: this doesn't seem right?
-    val tcpPort: Short
+    val peers: List<Pair<String, UShort>>
 )

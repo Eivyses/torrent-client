@@ -35,8 +35,12 @@ class UdpCommunicationResponseTest {
     val interval = 3600
     val leechers = 1667
     val seeders = 420
-    val ipAddress = 1921686412
-    val tcpPort: Short = 8080
+    val peers =
+        listOf<Pair<String, UShort>>(
+            "245.242.231.61" to 8080u,
+            "62.185.141.218" to 1123u,
+            "192.168.64.12" to 51413u,
+            "245.245.254.254" to 65500u)
     // Offset      Size            Name            Value
     // 0           32-bit integer  action          1 // announce
     // 4           32-bit integer  transaction_id
@@ -52,8 +56,10 @@ class UdpCommunicationResponseTest {
     buffer.putInt(interval)
     buffer.putInt(leechers)
     buffer.putInt(seeders)
-    buffer.putInt(ipAddress)
-    buffer.putShort(tcpPort)
+    peers.forEach { (ip, port) ->
+      ip.split(".").forEach { ipPart -> buffer.put(ipPart.toInt().toByte()) }
+      buffer.putShort(port.toShort())
+    }
 
     val response = parseAnnounceResponse(buffer.array())
     assertEquals(action, response.action)
@@ -61,7 +67,6 @@ class UdpCommunicationResponseTest {
     assertEquals(interval, response.interval)
     assertEquals(leechers, response.leechers)
     assertEquals(seeders, response.seeders)
-    assertEquals(ipAddress, response.ipAddress)
-    assertEquals(tcpPort, response.tcpPort)
+    assertEquals(peers, response.peers)
   }
 }
